@@ -1,4 +1,24 @@
+fireworks/llama-v2-7b:
+  class: evals.completion_fns.fireworks:FireworksCompletionFn
+  args:
+    model: "accounts/fireworks/models/llama-v2-7b"
+
 fireworks/llama-v2-7b-chat:
   class: evals.completion_fns.fireworks:FireworksChatCompletionFn
   args:
     model: "accounts/fireworks/models/llama-v2-7b-chat"
+
+fireworks/llama-v2-13b:
+  class: evals.completion_fns.fireworks:FireworksCompletionFn
+  args:
+    model: "accounts/fireworks/models/llama-v2-13b"
+
+fireworks/llama-v2-13b-chat:
+  class: evals.completion_fns.fireworks:FireworksChatCompletionFn
+  args:
+    model: "accounts/fireworks/models/llama-v2-13b-chat"
+
+fireworks/llama-v2-70b-chat:
+  class: evals.completion_fns.fireworks:FireworksChatCompletionFn
+  args:
+    model: "accounts/fireworks/models/llama-v2-70b-chat"
