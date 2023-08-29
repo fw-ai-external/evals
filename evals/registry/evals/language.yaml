@@ -2,7 +2,7 @@ hellaswag:
   id: hellaswag.val.ab-v1
   metrics: [accuracy]
 hellaswag.val.ab-v1:
-  class: evals.elsuite.multiple_choice:MultipleChoice
+  class: evals.elsuite.hellaswag:HellaSwag
   args:
     dataset: hf://hellaswag?split=validation
     instructions: "Choose the most plausible continuation for the story."

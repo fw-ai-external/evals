@@ -60,7 +60,9 @@ class Eval(abc.ABC):
     ):
         splits = name.split(".")
         if len(splits) < 2:
-            raise ValueError(f"Eval name must at least have <base_eval>.<split>. Got name {name}")
+            raise ValueError(
+                f"Eval name must at least have <base_eval>.<split>. Got name {name}"
+            )
 
         self.completion_fns = completion_fns
         self.seed = seed
@@ -97,7 +99,9 @@ class Eval(abc.ABC):
             async with semaphore:
                 return await eval_fn(args)
 
-        futures = [asyncio.ensure_future(eval_fn_with_semaphore(args)) for args in work_items]
+        futures = [
+            asyncio.ensure_future(eval_fn_with_semaphore(args)) for args in work_items
+        ]
 
         for future in tqdm(
             asyncio.as_completed(futures), total=len(samples), disable=not show_progress
@@ -108,6 +112,7 @@ class Eval(abc.ABC):
         self,
         recorder: RecorderBase,
         samples,
+        few_shots: Optional[str] = None,
         show_progress=True,
         record_raw_sample=True,
         **_kwargs: Any,
@@ -129,7 +134,7 @@ class Eval(abc.ABC):
             with recorder.as_default_recorder(sample_id):
                 seed = f"{sample_id}:{self.seed}".encode("utf-8")
                 rng = random.Random(seed)
-                return idx, self.eval_sample(sample, rng)
+                return idx, self.eval_sample(sample, rng, few_shots)
 
         with ThreadPool(threads) as pool:
             if os.environ.get("EVALS_SEQUENTIAL", "0") in {"1", "true", "yes"}:
@@ -138,13 +143,16 @@ class Eval(abc.ABC):
             else:
                 logger.info(f"Running in threaded mode with {threads} threads!")
                 iter = pool.imap_unordered(eval_sample, work_items)
-            idx_and_result = list(tqdm(iter, total=len(work_items), disable=not show_progress))
+            idx_and_result = list(
+                tqdm(iter, total=len(work_items), disable=not show_progress)
+            )
         return [r for _, r in sorted(idx_and_result)]
 
     def get_samples(self):
         if self.samples_jsonl is None:
             raise ValueError(
-                "To use `get_samples`, you must provide a `samples_jsonl` path." "Got `None`."
+                "To use `get_samples`, you must provide a `samples_jsonl` path."
+                "Got `None`."
             )
 
         return get_jsonl(self.samples_jsonl)

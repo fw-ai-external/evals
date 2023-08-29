@@ -8,10 +8,14 @@ from evals.formatting import make_abc
 from evals.record import RecorderBase
 from datasets import load_dataset
 
+
 class Sample(BaseModel):
     question: str
     answers: list[str]
     label: int
+    shot: str
+    activity_label: str
+
 
 def get_dataset(url: str) -> list[Sample]:
     parsed = urlparse(url)
@@ -28,6 +32,8 @@ def get_dataset(url: str) -> list[Sample]:
                     question=sample["ctx"],
                     answers=sample["endings"],
                     label=int(sample["label"]),
+                    shot=sample["ctx"] + " " + sample["endings"][int(sample["label"])],
+                    activity_label=sample["activity_label"],
                 )
                 for sample in dataset
             ]
@@ -43,6 +49,7 @@ def get_dataset(url: str) -> list[Sample]:
 
     raise ValueError(f"Unknown question dataset {url}")
 
+
 class MultipleChoice(evals.Eval):
     def __init__(
         self,
@@ -53,7 +60,9 @@ class MultipleChoice(evals.Eval):
         **kwargs,
     ):
         super().__init__(completion_fns, *args, **kwargs)
-        assert len(completion_fns) == 1, "MultipleChoice only supports one completion fn"
+        assert (
+            len(completion_fns) == 1
+        ), "MultipleChoice only supports one completion fn"
         self.dataset = dataset
         self.instructions = instructions
 
@@ -66,7 +75,14 @@ class MultipleChoice(evals.Eval):
             rng=rng,
         )
 
-        prompt = self.instructions + "\nPlease answer with the letter of the correct answer." + "\n\n" + sample.question + "\n" + options
+        prompt = (
+            self.instructions
+            + "\nPlease answer with the letter of the correct answer."
+            + "\n\n"
+            + sample.question
+            + "\n"
+            + options
+        )
         result = self.completion_fn(
             prompt=prompt,
             temperature=0.0,
@@ -79,7 +95,6 @@ class MultipleChoice(evals.Eval):
             sampled=sampled,
             expected=correct_answer,
         )
-
 
     def run(self, recorder: RecorderBase):
         samples = get_dataset(self.dataset)
